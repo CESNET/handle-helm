@@ -1,7 +1,7 @@
 Handle.net Helm chart
 =====================
 
-Helm chart for deployment of the [Handle.net][handle.net] CESNET registry in a Kubernetes cluster.
+Helm chart for deployment of the [Handle.net](handle.net) CESNET registry in a Kubernetes cluster.
 
 Requirements
 ------------
