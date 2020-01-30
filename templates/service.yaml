@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "handle-net.fullname" . }}
+  labels:
+    {{- include "handle-net.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.ports.clientPort }}
+      targetPort: clitcp
+      protocol: TCP
+      name: clitcp
+    - port: {{ .Values.ports.clientPort }}
+      targetPort: cliudp
+      protocol: UDP
+      name: cliudp
+    - port: {{ .Values.ports.httpPort }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "handle-net.selectorLabels" . | nindent 4 }}
