@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: "{{ include "handle-net.fullname" . }}-test-connection"
   labels:
-{{ include "handle-net.labels" . | nindent 4 }}
+{{- include "handle-net.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test-success
 spec:

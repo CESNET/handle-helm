@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "handle-net.fullname" . }}
+  labels:
+    {{- include "handle-net.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ .Values.service.name | quote }}
+  replicas: {{ .Values.replicaCount }}
+  updateStrategy:
+    type: {{ .Values.updateStrategy.type | quote }}
+  selector:
+    matchLabels:
+      {{- include "handle-net.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "handle-net.labels" . | nindent 8 }}
+      {{- if not (empty .Values.podLabels) }}
+{{ toYaml .Values.podLabels | indent 8 }}
+      {{- end }}
+      {{- if .Values.podAnnotations }}
+      annotations:
+{{- toYaml .Values.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+  {{ toYaml .Values.image.pullSecrets | indent 8 }}
+      {{- end }}
+      {{- if and .Values.serviceAccount.create .Values.rbacEnabled}}
+      serviceAccountName: {{ include "handle-net.serviceAccountName" . }}
+      {{- end }}
+      {{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: {{ .Values.service.name | quote }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          {{- if .Values.securityContext.enabled }}
+          securityContext:
+            runAsUser: {{ .Values.securityContext.runAsUser }}
+            runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.clientPort }}
+              name: clitcp
+              protocol: TCP
+            - containerPort: {{ .Values.service.clientPort }}
+              protocol: UDP
+              name: cliudp
+            - containerPort: {{ .Values.service.port }}
+              protocol: TCP
+              name: http
+          {{- if .Values.resources }}
+          resources:
+{{ toYaml .Values.resources | indent 10 }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          {{- end }}
+          env:
+            - name: SRV_DIR
+              value: {{ .Values.handle.srvDir | quote }}
+            - name: HANDLE_USER_ID
+              value: {{ .Values.handle.user | quote }}
+            - name: CERTIFI_PASSPHRASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "handle-net.secretCertificationName" . }}
+                  key: certification-key-passphrase
+            - name: ADM_PASSPHRASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "handle-net.secretAdmName" . }}
+                  key: adm-key-passphrase

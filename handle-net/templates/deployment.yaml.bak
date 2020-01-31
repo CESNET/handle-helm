@@ -23,24 +23,27 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: clitcp
-              containerPort: {{ .Values.ports.clientPort }}
+              containerPort: 2641
               protocol: TCP
             - name: cliudp
-              containerPort: {{ .Values.ports.clientPort }}
+              containerPort: 2641
               protocol: UDP
             - name: http
-              containerPort: {{ .Values.ports.httpPort }}
+              containerPort: 8000
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /
               port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
           readinessProbe:
             httpGet:
               path: /

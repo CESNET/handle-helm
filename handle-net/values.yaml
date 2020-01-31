@@ -1,0 +1,166 @@
+# Default values for handle-net.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+
+# Image configuration
+image:
+  registry: docker.io
+  repository: mirekys/handle-net
+  tag: 9.2.0
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+# Kubernetes service configuration
+service:
+  name: example-handle
+  type: NodePort
+  port: 8000
+  clientPort: 2641
+  ## Service annotations
+  #annotations:
+
+# Handle.net server configuration
+handle:
+  user: 1000
+  srvDir: /srv/handle
+  certificationPassphrase: handl3.net-CHANGEME!!!
+  #existingCertificationSecret: name-of-existing-secret
+  administrativePassphrase: handl3.net-adm-CHANGEME!!!
+  #existingAdministrativeSecret: name-of-existing-secret
+  #extraConfiguration:
+
+## Pod Security Context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+##
+securityContext:
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  enabled: true
+  runAsNonRoot: true
+  fsGroup: 1000
+  runAsUser: 1000
+
+## Configure resource requests and limits
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+##
+resources: {}
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+# limits:
+#   cpu: 100m
+#   memory: 128Mi
+# requests:
+  #   cpu: 100m
+#   memory: 128Mi
+
+## updateStrategy for handle statefulset
+## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+updateStrategy:
+  type: RollingUpdate
+
+## Node labels and tolerations for pod assignment
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Additional pod labels and annotations to apply
+podLabels: {}
+podAnnotations: {}
+nameOverride: ""
+fullnameOverride: ""
+
+## does your cluster have rbac enabled? assume yes by default
+rbacEnabled: false
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext: {}
+
+## Configure the ingress resource that allows you to access the
+## Wordpress installation. Set up the URL
+## ref: http://kubernetes.io/docs/user-guide/ingress/
+##
+ingress:
+  ## Set to true to enable ingress record generation
+  enabled: false
+
+  ## The list of hostnames to be covered with this ingress record.
+  ## Most likely this will be just one host, but in the event more hosts are needed, this is an array
+  ## hostName: foo.bar.com
+  path: /
+
+  ## Set this to true in order to enable TLS on the ingress record
+  ## A side effect of this will be that the backend handle service will be connected at port 443
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+  ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
+  #tlsSecret: myTlsSecret
+
+  ## Ingress annotations done as key:value pairs
+  ## If you're using kube-lego, you will want to add:
+  ## kubernetes.io/tls-acme: true
+  ##
+  ## For a full list of possible ingress annotations, please see
+  ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/annotations.md
+  ##
+  ## If tls is set to true, annotation ingress.kubernetes.io/secure-backends: "true" will automatically be set
+  annotations: {}
+  #  kubernetes.io/ingress.class: nginx
+  #  kubernetes.io/tls-acme: true
+  hosts: {}
+#    - host: chart-example.local
+#      paths: []
+
+## The following settings are to configure the frequency of the lifeness and readiness probes
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 120
+  timeoutSeconds: 20
+  periodSeconds: 30
+  failureThreshold: 6
+  successThreshold: 1
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  timeoutSeconds: 20
+  periodSeconds: 30
+  failureThreshold: 3
+  successThreshold: 1
+
+metrics:
+  enabled: false
+#    image:
+#      registry: docker.io
+#      repository: cesnet/handle-exporter
+#      tag: latest
+#      pullPolicy: IfNotPresent
+#      ## Optionally specify an array of imagePullSecrets.
+#      ## Secrets must be manually created in the namespace.
+#      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+#      ##
+#      # pullSecrets:
+#      #   - myRegistryKeySecretName
+#
+#    ## environment variables to configure handle_exporter
+#    ## ref: https://github.com/kbudde/rabbitmq_exporter#configuration
+#    env: {}
+#    resources: {}
+#    annotations:
+#      prometheus.io/scrape: "true"
+#      prometheus.io/port: "9090"

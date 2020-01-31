@@ -1,0 +1,11 @@
+apiVersion: v2
+name: handle-net
+description: Handle.Net Registry service
+maintainers:
+  - name: Miroslav Bauer
+    email: bauer@cesnet.cz
+
+type: application
+
+version: 0.1.1
+appVersion: 9.2.0
