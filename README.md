@@ -12,7 +12,6 @@ Quickstart
 ----------
 ```
 git clone https://github.com/CESNET/handle-helm
-<<<<<<< HEAD
 helm install example-hdl ./handle-net
 ```
 
